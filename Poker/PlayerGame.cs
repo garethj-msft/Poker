@@ -12,6 +12,7 @@ namespace Poker
 
         public PlayerGame()
         {
+            WinStrategies = new List<IHandWinStrategy>();
             Hand = new SortedSet<Card>(new CardComparer());
         }
 
@@ -21,48 +22,37 @@ namespace Poker
             Hand.Add(card);
         }
 
+        // Win Strategies to be injected.
+        public IList<IHandWinStrategy> WinStrategies { get; private set; }
+
         public SortedSet<Card> Hand { get; private set; }
 
         public WinCondition CalculateHighestWin()
         {
             WinCondition highestWin = WinCondition.NoWin;
-
-            int[] flushes = new int[Enum.GetValues(typeof(Suit)).Length];
-            int straightCount = 1;
-            int firstPairIndex = -1, secondPairIndex = -1;
-
             IList<Card> cards = Hand.ToList();
+            foreach ( var strategy in WinStrategies)
+            {
+                strategy.InitializeWinSession(cards);
+            }
             for (int i = 0; i < cards.Count; i++)
             {
-                // Bump the flush count for each suit card found.
-                flushes[(int)cards[i].Suit]++;
-
-                // Bump the straightCount if we're one more than the last card
-                if (i > 0 && cards[i].Face == cards[i - 1].Face + 1)
+                foreach (var strategy in WinStrategies)
                 {
-                    straightCount++;
-                }
-
-                // List is sorted, so pairs are next to each other.
-                if (i > 0 && firstPairIndex == -1 && cards[i].Face == cards[i - 1].Face)
-                {
-                    firstPairIndex = i;
-                    if (WinCondition.Pair > highestWin) highestWin = WinCondition.Pair;
-                }
-                // Only look for second pair after the first pair
-                if (firstPairIndex != -1 && secondPairIndex == -1 && i > (firstPairIndex + 1) && cards[i].Face == cards[i - 1].Face)
-                {
-                    secondPairIndex = i;
-                    if (WinCondition.TwoPair > highestWin) highestWin = WinCondition.TwoPair;
+                    WinCondition cardCondition = strategy.CheckPerCardWin(i);
+                    if (cardCondition > highestWin)
+                    {
+                        highestWin = cardCondition;
+                    }
                 }
             }
-            if (straightCount == Hand.Count)
+            foreach (var strategy in WinStrategies)
             {
-                if (WinCondition.Straight > highestWin) highestWin = WinCondition.Straight;
-            }
-            if (flushes.Any(f => f == Hand.Count))
-            {
-                if (WinCondition.Flush > highestWin) highestWin = WinCondition.Flush;
+                WinCondition overallCondition = strategy.CheckOverallWin();
+                if (overallCondition > highestWin)
+                {
+                    highestWin = overallCondition;
+                }
             }
             return highestWin;
         }

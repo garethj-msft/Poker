@@ -11,6 +11,7 @@ namespace Test.Poker
         public void TestFlushOverStraight()
         {
             var sut = new PlayerGame();
+            InjectStrategies(sut);
             sut.Deal(new Card { Suit = Suit.Hearts, Face = 9 });
             sut.Deal(new Card { Suit = Suit.Hearts, Face = 10 });
             sut.Deal(new Card { Suit = Suit.Hearts, Face = 11 });
@@ -24,6 +25,7 @@ namespace Test.Poker
         public void TestFlush()
         {
             var sut = new PlayerGame();
+            InjectStrategies(sut);
             sut.Deal(new Card { Suit = Suit.Hearts, Face = 7 });
             sut.Deal(new Card { Suit = Suit.Hearts, Face = 2 });
             sut.Deal(new Card { Suit = Suit.Hearts, Face = 5 });
@@ -37,6 +39,7 @@ namespace Test.Poker
         public void TestStraight()
         {
             var sut = new PlayerGame();
+            InjectStrategies(sut);
             sut.Deal(new Card { Suit = Suit.Hearts,   Face = 9 });
             sut.Deal(new Card { Suit = Suit.Clubs,    Face = 10 });
             sut.Deal(new Card { Suit = Suit.Diamonds, Face = 11 });
@@ -50,6 +53,7 @@ namespace Test.Poker
         public void TestPair()
         {
             var sut = new PlayerGame();
+            InjectStrategies(sut);
             sut.Deal(new Card { Suit = Suit.Hearts, Face = 9 });
             sut.Deal(new Card { Suit = Suit.Clubs, Face = 10 });
             sut.Deal(new Card { Suit = Suit.Diamonds, Face = 11 });
@@ -63,6 +67,7 @@ namespace Test.Poker
         public void TestTwoPair()
         {
             var sut = new PlayerGame();
+            InjectStrategies(sut);
             sut.Deal(new Card { Suit = Suit.Hearts, Face = 9 });
             sut.Deal(new Card { Suit = Suit.Clubs, Face = 9 });
             sut.Deal(new Card { Suit = Suit.Diamonds, Face = 11 });
@@ -76,6 +81,7 @@ namespace Test.Poker
         public void TestThreeNotTwoPair()
         {
             var sut = new PlayerGame();
+            InjectStrategies(sut);
             sut.Deal(new Card { Suit = Suit.Hearts, Face = 9 });
             sut.Deal(new Card { Suit = Suit.Clubs, Face = 11 });
             sut.Deal(new Card { Suit = Suit.Diamonds, Face = 11 });
@@ -89,6 +95,7 @@ namespace Test.Poker
         public void TestFlushOverPair()
         {
             var sut = new PlayerGame();
+            InjectStrategies(sut);
             sut.Deal(new Card { Suit = Suit.Hearts, Face = 9 });
             sut.Deal(new Card { Suit = Suit.Hearts, Face = 10 });
             sut.Deal(new Card { Suit = Suit.Hearts, Face = 11 });
@@ -102,6 +109,7 @@ namespace Test.Poker
         public void TestFlushOverTwoPair()
         {
             var sut = new PlayerGame();
+            InjectStrategies(sut);
             sut.Deal(new Card { Suit = Suit.Hearts, Face = 9 });
             sut.Deal(new Card { Suit = Suit.Hearts, Face = 9 });
             sut.Deal(new Card { Suit = Suit.Hearts, Face = 11 });
@@ -109,6 +117,13 @@ namespace Test.Poker
             sut.Deal(new Card { Suit = Suit.Hearts, Face = 2 });
 
             Assert.AreEqual(WinCondition.Flush, sut.CalculateHighestWin(), "Wrong highest win.");
+        }
+
+        private void InjectStrategies(PlayerGame sut)
+        {
+            sut.WinStrategies.Add(new PairsWinStrategy());
+            sut.WinStrategies.Add(new StraightWinStrategy());
+            sut.WinStrategies.Add(new FlushWinStrategy());
         }
 
     }
